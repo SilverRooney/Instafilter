@@ -5,54 +5,25 @@
 //  Created by Silver on 7/21/22.
 //
 
-import CoreImage
-import CoreImage.CIFilterBuiltins
+
 import SwiftUI
 
 struct ContentView: View {
     @State private var image: Image?
+    @State private var showingImagePicker = false
     
     var body: some View {
         VStack {
             image?
                 .resizable()
                 .scaledToFit()
+            
+            Button("Select Image") {
+                showingImagePicker = true
+            }
         }
-        .onAppear(perform: loadImage)
-    }
-    
-    func loadImage() {
-        //our UI Image
-        guard let inputImage = UIImage(named: "Example") else { return }
-        //needs to be CI Image
-        let beginImage = CIImage(image: inputImage)
-        
-        // next
-        let context = CIContext()
-        let currentFilter = CIFilter.twirlDistortion() //pixellate, crystalize, etc
-        currentFilter.inputImage = beginImage
-        
-        let amount = 1.0
-        let inputKeys = currentFilter.inputKeys
-        
-        if inputKeys.contains(kCIInputIntensityKey) {
-            currentFilter.setValue(amount, forKey: kCIInputIntensityKey)
-        }
-        
-        if inputKeys.contains(kCIInputScaleKey) {
-            currentFilter.setValue(amount * 10, forKey: kCIInputScaleKey)
-        }
-        
-        if inputKeys.contains(kCIInputRadiusKey) {
-            currentFilter.setValue(amount * 200, forKey: kCIInputRadiusKey)
-        }
-        
-        //now output that into a real image
-        guard let outputImage = currentFilter.outputImage else { return }
-        
-        if let cgimg = context.createCGImage(outputImage, from: outputImage.extent) {
-            let uiImage = UIImage(cgImage: cgimg)
-            image = Image(uiImage: uiImage)
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker()
         }
     }
 }
